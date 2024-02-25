@@ -1,8 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../moduls/add_task.dart';
 import '../moduls/description.dart';
 
@@ -12,7 +11,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  String uid = '';
+
   @override
   void initState() {
     super.initState();
@@ -29,17 +28,14 @@ class _HomeState extends State<Home> {
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('tasks')
-          .document(uid)
-          .collection('mytasks')
-          .snapshots()
-          builder: (context, snapshot) {
+          stream: FirebaseFirestore.instance.collection('testbd').snapshots(),
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                 child: CircularProgressIndicator(),
               );
             } else {
-              final docs = snapshot.data.documents;
+              final docs = snapshot.data!.docs;
 
               return ListView.builder(
                 itemCount: docs.length,
@@ -52,6 +48,7 @@ class _HomeState extends State<Home> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => Description(
+                                    key: docs[index]['key'],
                                     title: docs[index]['title'],
                                     description: docs[index]['description'],
                                   )));
@@ -88,10 +85,9 @@ class _HomeState extends State<Home> {
                                     Icons.delete,
                                   ),
                                   onPressed: () async {
-                                    await FirebaseFirestore.instance.collection('tasks');
-                                        FirebaseFirestore.instance.collection('mytasks');
-                                        FirebaseFirestore.instance.document(docs[index]['time']);
-                                        FirebaseFirestore.instance.delete();
+                                    await FirebaseFirestore.instance.collection('tasks')
+                                      .doc(docs[index].id)
+                                      .delete();
                                   }))
                         ],
                       ),
@@ -102,7 +98,6 @@ class _HomeState extends State<Home> {
             }
           },
         ),
-        // color: Colors.red,
       ),
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add, color: Colors.white),

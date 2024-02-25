@@ -1,7 +1,32 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+void someFunction() {
+  CollectionReference collectionReference =
+      FirebaseFirestore.instance.collection('Testbd');
+
+  // To reference a document within the collection, use the doc() method
+  DocumentReference documentReference = collectionReference.doc('todo');
+
+  // DocumentReference DataReference =
+  //     collectionReference.data('setData');
+
+  documentReference.get().then((DocumentSnapshot snapshot) {
+    if (snapshot.exists) {
+      // Document exists, you can access its data using snapshot.data()
+      var data = snapshot.data();
+      print(data);
+    } else {
+      // Document doesn't exist
+      print('Document does not exist');
+    }
+  }).catchError((error) {
+    // Handle errors
+    print('Error getting document: $error');
+  });
+}
 
 class AddTask extends StatefulWidget {
   @override
@@ -14,10 +39,7 @@ class _AddTaskState extends State<AddTask> {
 
   addtasktofirebase() async {
     var time = DateTime.now();
-    await FirebaseFirestore.instance
-        .collection('Задача')
-        .document(time.toString())
-        .setData({
+    await FirebaseFirestore.instance.collection('Задача').doc(time.toString()).set({
       'title': titleController.text,
       'description': descriptionController.text,
       'time': time.toString(),
